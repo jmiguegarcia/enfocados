@@ -4,3 +4,4 @@ dist/
 *.log
 .env
 servidor/datos/*.json
+servidor/db.js
