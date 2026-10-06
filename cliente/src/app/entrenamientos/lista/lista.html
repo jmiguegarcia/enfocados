@@ -1,0 +1,14 @@
+<h2>Entrenamientos</h2>
+
+<ul>
+  @for (entrenamiento of entrenamientos(); track entrenamiento.id) {
+    <li>
+      <strong>{{ entrenamiento.fecha }}</strong> - {{ entrenamiento.tipo }} - {{ entrenamiento.duracionMinutos }} min
+      <p>{{ entrenamiento.notas }}</p>
+      <button type="button" (click)="eliminarEntrenamiento(entrenamiento.id)">
+         Eliminar
+      </button>
+      <a [routerLink]="['/editar', entrenamiento.id]">Editar</a>
+    </li>
+  }
+</ul>

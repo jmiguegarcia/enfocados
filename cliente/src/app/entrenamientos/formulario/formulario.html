@@ -1,0 +1,25 @@
+<h2>Añadir entrenamiento</h2>
+
+<form [formGroup]="formulario" (ngSubmit)="guardar()">
+  <label>
+    Fecha
+    <input type="date" formControlName="fecha" />
+  </label>
+
+  <label>
+    Tipo
+    <input type="text" formControlName="tipo" />
+  </label>
+
+  <label>
+    Duración en minutos
+    <input type="number" formControlName="duracionMinutos" />
+  </label>
+
+  <label>
+    Notas
+    <textarea formControlName="notas"></textarea>
+  </label>
+
+  <button type="submit">Guardar</button>
+</form>
