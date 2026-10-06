@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs/promises');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -7,7 +9,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const entrenamientos = [
+const DATOS_DIR = path.join(__dirname, 'datos');
+const ARCHIVO_DATOS = path.join(DATOS_DIR, 'entrenamientos.json');
+
+const entrenamientosIniciales = [
   {
     id: 1,
     fecha: '2026-10-05',
@@ -16,14 +21,41 @@ const entrenamientos = [
     notas: 'Entrenamiento inicial'
   }
 ];
-    
+
+let entrenamientos = [];
+let nextId = 2;
+
+async function guardarEntrenamientos() {
+  await fs.mkdir(DATOS_DIR, { recursive: true });
+  await fs.writeFile(ARCHIVO_DATOS, JSON.stringify(entrenamientos, null, 2), 'utf-8');
+}
+
+async function cargarEntrenamientos() {
+  try {
+    const contenido = await fs.readFile(ARCHIVO_DATOS, 'utf-8');
+    entrenamientos = JSON.parse(contenido);
+    console.log(`Datos cargados desde: ${ARCHIVO_DATOS}`);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      entrenamientos = [...entrenamientosIniciales];
+      await guardarEntrenamientos();
+      console.log(`Archivo no encontrado. Creado y cargado archivo inicial en: ${ARCHIVO_DATOS}`);
+    } else {
+      console.error('Error al cargar datos de entrenamientos:', error);
+      throw error;
+    }
+  }
+
+  nextId = entrenamientos.length > 0
+    ? Math.max(...entrenamientos.map(t => Number(t.id) || 0)) + 1
+    : 1;
+}
+
 app.get('/api/entrenamientos', (req, res) => {
   res.json(entrenamientos);
 });
 
-let nextId = 2;
-
-app.post('/api/entrenamientos', (req, res) => {
+app.post('/api/entrenamientos', async (req, res) => {
   const { fecha, tipo, duracionMinutos, notas } = req.body;
 
   if (!fecha || !tipo || !duracionMinutos) {
@@ -39,10 +71,16 @@ app.post('/api/entrenamientos', (req, res) => {
   };
 
   entrenamientos.push(nuevoEntrenamiento);
-  res.status(201).json(nuevoEntrenamiento);
+  try {
+    await guardarEntrenamientos();
+    res.status(201).json(nuevoEntrenamiento);
+  } catch (error) {
+    console.error('Error al guardar entrenamientos:', error);
+    res.status(500).json({ error: 'Error al persistir los datos' });
+  }
 });
 
-app.delete('/api/entrenamientos/:id', (req, res) => {
+app.delete('/api/entrenamientos/:id', async (req, res) => {
   const id = Number(req.params.id);
   const index = entrenamientos.findIndex(t => t.id === id);
 
@@ -51,10 +89,16 @@ app.delete('/api/entrenamientos/:id', (req, res) => {
   }
 
   entrenamientos.splice(index, 1);
-  res.status(204).send();
+  try {
+    await guardarEntrenamientos();
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error al guardar entrenamientos:', error);
+    res.status(500).json({ error: 'Error al persistir los datos' });
+  }
 });
 
-app.put('/api/entrenamientos/:id', (req, res) => {
+app.put('/api/entrenamientos/:id', async (req, res) => {
   const id = Number(req.params.id);
   const entrenamiento = entrenamientos.find(t => t.id === id);
 
@@ -73,7 +117,13 @@ app.put('/api/entrenamientos/:id', (req, res) => {
   entrenamiento.duracionMinutos = duracionMinutos;
   entrenamiento.notas = notas ?? '';
 
-  res.json(entrenamiento);
+  try {
+    await guardarEntrenamientos();
+    res.json(entrenamiento);
+  } catch (error) {
+    console.error('Error al guardar entrenamientos:', error);
+    res.status(500).json({ error: 'Error al persistir los datos' });
+  }
 });
 
 app.get('/api/entrenamientos/:id', (req, res) => {
@@ -87,6 +137,16 @@ app.get('/api/entrenamientos/:id', (req, res) => {
   res.json(entrenamiento);
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
-});
+async function iniciarServidor() {
+  try {
+    await cargarEntrenamientos();
+    app.listen(PORT, () => {
+      console.log(`Servidor escuchando en http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('Error al iniciar el servidor:', error);
+    process.exit(1);
+  }
+}
+
+iniciarServidor();

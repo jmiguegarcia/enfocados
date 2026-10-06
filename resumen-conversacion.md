@@ -67,11 +67,10 @@ C:\Users\juan1\Cursos\project-ia
 
 ## Estado actual
 
-La app ya permite gestionar entrenamientos desde el navegador, pero los datos solo están en memoria del servidor. Al reiniciar el backend se pierden.
+La app ya permite gestionar entrenamientos desde el navegador. Los datos ahora persisten en `servidor/datos/entrenamientos.json`, por lo que no se pierden al reiniciar el backend. El proyecto está versionado con git y sincronizado con GitHub: https://github.com/jmiguegarcia/enfocados.
 
 ## Siguientes pasos posibles
 
-- Persistir los datos en JSON o SQLite.
 - Mejorar la interfaz.
 - Añadir filtros o búsqueda.
 - Mostrar estadísticas.
