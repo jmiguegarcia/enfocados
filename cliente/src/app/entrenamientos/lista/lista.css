@@ -1,0 +1,57 @@
+:host {
+  display: block;
+}
+
+.cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.duracion {
+  color: #475569;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.notas {
+  color: #64748b;
+  margin: 0 0 1rem 0;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn.editar {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.btn.eliminar {
+  background: #ef4444;
+  color: #fff;
+}

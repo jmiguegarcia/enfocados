@@ -1,14 +1,17 @@
 <h2>Entrenamientos</h2>
 
-<ul>
+<div class="cards">
   @for (entrenamiento of entrenamientos(); track entrenamiento.id) {
-    <li>
-      <strong>{{ entrenamiento.fecha }}</strong> - {{ entrenamiento.tipo }} - {{ entrenamiento.duracionMinutos }} min
-      <p>{{ entrenamiento.notas }}</p>
-      <button type="button" (click)="eliminarEntrenamiento(entrenamiento.id)">
-         Eliminar
-      </button>
-      <a [routerLink]="['/editar', entrenamiento.id]">Editar</a>
-    </li>
+    <article class="card">
+      <h3>{{ entrenamiento.tipo }} - {{ entrenamiento.fecha }}</h3>
+      <p class="duracion">{{ entrenamiento.duracionMinutos }} min</p>
+      <p class="notas">{{ entrenamiento.notas }}</p>
+      <div class="acciones">
+        <a [routerLink]="['/editar', entrenamiento.id]" class="btn editar">Editar</a>
+        <button type="button" (click)="eliminarEntrenamiento(entrenamiento.id)" class="btn eliminar">
+          Eliminar
+        </button>
+      </div>
+    </article>
   }
-</ul>
+</div>
