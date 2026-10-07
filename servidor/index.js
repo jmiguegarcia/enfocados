@@ -26,7 +26,7 @@ app.post('/api/entrenamientos', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'INSERT INTO entrenamientos (fecha, tipo, duracionMinutos, notas) VALUES ($1, $2, $3, $4) RETURNING *',
+      'INSERT INTO entrenamientos (fecha, tipo, "duracionMinutos", notas) VALUES ($1, $2, $3, $4) RETURNING *',
       [fecha, tipo, duracionMinutos, notas || '']
     );
     res.status(201).json(result.rows[0]);
@@ -58,7 +58,7 @@ app.put('/api/entrenamientos/:id', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'UPDATE entrenamientos SET fecha = $1, tipo = $2, duracionMinutos = $3, notas = $4 WHERE id = $5 RETURNING *',
+      'UPDATE entrenamientos SET fecha = $1, tipo = $2, "duracionMinutos" = $3, notas = $4 WHERE id = $5 RETURNING *',
       [fecha, tipo, duracionMinutos, notas ?? '', id]
     );
     if (result.rows.length === 0) {
