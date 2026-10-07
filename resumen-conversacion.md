@@ -1,6 +1,6 @@
 # Resumen de la conversación y avance del proyecto
 
-Fecha: 2026-10-05
+Fecha: 2026-10-06
 
 ## Objetivo
 
@@ -13,6 +13,8 @@ Crear una aplicación para registrar entrenamientos diarios manualmente usando A
 - npm 11.12.1
 - Express 5.2.1
 - CORS 2.8.6
+- PostgreSQL 18
+- pg (node-postgres)
 - Antigravity / Gemini Pro para asistencia al desarrollo
 
 ## Estructura del proyecto
@@ -67,7 +69,7 @@ C:\Users\juan1\Cursos\project-ia
 
 ## Estado actual
 
-La app ya permite gestionar entrenamientos desde el navegador. Los datos ahora persisten en `servidor/datos/entrenamientos.json`, por lo que no se pierden al reiniciar el backend. El proyecto está versionado con git y sincronizado con GitHub: https://github.com/jmiguegarcia/enfocados.
+La app ya permite gestionar entrenamientos desde el navegador. Los datos ahora persisten en PostgreSQL (base de datos `training_db`, tabla `entrenamientos`). El proyecto está versionado con git y sincronizado con GitHub: https://github.com/jmiguegarcia/enfocados.
 
 ## Siguientes pasos posibles
 
