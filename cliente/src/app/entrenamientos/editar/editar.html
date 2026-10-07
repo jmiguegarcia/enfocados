@@ -1,4 +1,16 @@
-<h2>Editar entrenamiento</h2>
+<h2>
+  @if (authService.puedeCrearEditar()) {
+    Editar entrenamiento
+  } @else {
+    Añadir notas / observaciones
+  }
+</h2>
+
+@if (!authService.puedeCrearEditar()) {
+  <p class="aviso-asistente">
+    ℹ️ Como entrenador asistente, puedes añadir y modificar las notas u observaciones de la sesión.
+  </p>
+}
 
 <form [formGroup]="formulario" (ngSubmit)="guardar()">
   <label>
@@ -17,9 +29,24 @@
   </label>
 
   <label>
-    Notas
-    <textarea formControlName="notas"></textarea>
+    Notas / Observaciones
+    <textarea formControlName="notas" rows="4"></textarea>
   </label>
 
-  <button type="submit" class="btn-guardar">Guardar cambios</button>
+  @if (authService.puedeCrearEditar()) {
+    <div class="checkbox-campo">
+      <label class="checkbox-label">
+        <input type="checkbox" formControlName="oculto" />
+        <span>🔒 Ocultar a los alumnos (liberar más adelante)</span>
+      </label>
+    </div>
+  }
+
+  <button type="submit" class="btn-guardar">
+    @if (authService.puedeCrearEditar()) {
+      Guardar cambios
+    } @else {
+      Guardar notas
+    }
+  </button>
 </form>

@@ -1,17 +1,48 @@
-<h2>Entrenamientos</h2>
-
-<div class="cards">
-  @for (entrenamiento of entrenamientos(); track entrenamiento.id) {
-    <article class="card">
-      <h3>{{ entrenamiento.tipo }} - {{ entrenamiento.fecha }}</h3>
-      <p class="duracion">{{ entrenamiento.duracionMinutos }} min</p>
-      <p class="notas">{{ entrenamiento.notas }}</p>
-      <div class="acciones">
-        <a [routerLink]="['/editar', entrenamiento.id]" class="btn editar">Editar</a>
-        <button type="button" (click)="eliminarEntrenamiento(entrenamiento.id)" class="btn eliminar">
-          Eliminar
-        </button>
-      </div>
-    </article>
+<div class="header-lista">
+  <h2>Entrenamientos</h2>
+  @if (authService.puedeCrearEditar()) {
+    <a routerLink="/nuevo" class="btn-nuevo-entrenamiento">+ Nuevo Entrenamiento</a>
   }
 </div>
+
+@if (cargando()) {
+  <p class="estado-mensaje">Cargando entrenamientos...</p>
+} @else if (entrenamientos().length === 0) {
+  <div class="vacio-box">
+    <p>No hay entrenamientos disponibles por el momento.</p>
+  </div>
+} @else {
+  <div class="cards">
+    @for (entrenamiento of entrenamientos(); track entrenamiento.id) {
+      <article class="card" [class.card-oculta]="entrenamiento.oculto">
+        <div class="card-top">
+          <h3>{{ entrenamiento.tipo }} - {{ entrenamiento.fecha }}</h3>
+          @if (entrenamiento.oculto) {
+            <span class="tag-oculto">🔒 Oculto a alumnos</span>
+          }
+        </div>
+        <p class="duracion">{{ entrenamiento.duracionMinutos }} min</p>
+        <p class="notas">{{ entrenamiento.notas || 'Sin notas adicionales.' }}</p>
+
+        @if (authService.puedeCrearEditar() || authService.rolEfectivo() === 'assistant_coach') {
+          <div class="acciones">
+            @if (authService.puedeCrearEditar()) {
+              <a [routerLink]="['/editar', entrenamiento.id]" class="btn editar">Editar</a>
+              <button
+                type="button"
+                (click)="eliminarEntrenamiento(entrenamiento.id)"
+                class="btn eliminar"
+              >
+                Eliminar
+              </button>
+            } @else if (authService.rolEfectivo() === 'assistant_coach') {
+              <a [routerLink]="['/editar', entrenamiento.id]" class="btn editar-notas">
+                ✏️ Editar Notas
+              </a>
+            }
+          </div>
+        }
+      </article>
+    }
+  </div>
+}

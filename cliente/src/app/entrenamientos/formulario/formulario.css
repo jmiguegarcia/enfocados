@@ -29,6 +29,24 @@ textarea {
   font-size: 1rem;
 }
 
+.checkbox-campo {
+  margin-top: 0.5rem;
+}
+
+.checkbox-label {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  margin-top: 0;
+  cursor: pointer;
+}
+
 .btn-guardar {
   background: #10b981;
   color: #fff;
@@ -36,5 +54,10 @@ textarea {
   padding: 0.6rem 1rem;
   border-radius: 6px;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
+}
+
+.btn-guardar:hover {
+  background: #059669;
 }

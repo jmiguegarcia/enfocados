@@ -8,7 +8,7 @@
 
   <label>
     Tipo
-    <input type="text" formControlName="tipo" />
+    <input type="text" formControlName="tipo" placeholder="Fuerza, Cardio, etc." />
   </label>
 
   <label>
@@ -18,8 +18,15 @@
 
   <label>
     Notas
-    <textarea formControlName="notas"></textarea>
+    <textarea formControlName="notas" placeholder="Detalles de la sesión..."></textarea>
   </label>
+
+  <div class="checkbox-campo">
+    <label class="checkbox-label">
+      <input type="checkbox" formControlName="oculto" />
+      <span>🔒 Ocultar a los alumnos (liberar más adelante)</span>
+    </label>
+  </div>
 
   <button type="submit" class="btn-guardar">Guardar</button>
 </form>

@@ -19,6 +19,7 @@ export class Formulario {
     tipo: ['', Validators.required],
     duracionMinutos: [0, [Validators.required, Validators.min(1)]],
     notas: [''],
+    oculto: [false]
   });
 
   guardar(): void {
@@ -33,6 +34,7 @@ export class Formulario {
       tipo: formValue.tipo ?? '',
       duracionMinutos: Number(formValue.duracionMinutos),
       notas: formValue.notas ?? '',
+      oculto: Boolean(formValue.oculto)
     };
 
     this.entrenamientoService.crearEntrenamiento(nuevoEntrenamiento).subscribe(() => {

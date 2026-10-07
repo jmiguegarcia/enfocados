@@ -2,6 +2,42 @@
   display: block;
 }
 
+.header-lista {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.header-lista h2 {
+  margin: 0;
+  color: #1e293b;
+}
+
+.btn-nuevo-entrenamiento {
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+
+.btn-nuevo-entrenamiento:hover {
+  background: #1d4ed8;
+}
+
+.estado-mensaje, .vacio-box {
+  color: #64748b;
+  font-size: 1rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
 .cards {
   display: grid;
   gap: 1rem;
@@ -11,13 +47,37 @@
 .card {
   background: #fff;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1.25rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #2563eb;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card-oculta {
+  border-left-color: #f59e0b;
+  background: #fffdf5;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
 }
 
 .card h3 {
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   font-size: 1.1rem;
+  color: #1e293b;
+}
+
+.tag-oculto {
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
 }
 
 .duracion {
@@ -29,6 +89,7 @@
 .notas {
   color: #64748b;
   margin: 0 0 1rem 0;
+  font-size: 0.92rem;
 }
 
 .acciones {
@@ -40,14 +101,20 @@
   padding: 0.4rem 0.8rem;
   border: none;
   border-radius: 6px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
+  font-weight: 500;
 }
 
 .btn.editar {
   background: #3b82f6;
+  color: #fff;
+}
+
+.btn.editar-notas {
+  background: #8b5cf6;
   color: #fff;
 }
 
