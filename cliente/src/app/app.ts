@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { AuthService } from './servicios/auth';
 
 @Component({
   imports: [RouterOutlet, RouterLink],
@@ -8,5 +9,14 @@ import { RouterLink, RouterOutlet } from '@angular/router';
   templateUrl: './app.html',
 })
 export class App {
-  protected readonly title = signal('cliente');
+  protected readonly title = signal('Training Tracker');
+  protected readonly authService = inject(AuthService);
+
+  cerrarSesion(): void {
+    this.authService.logout();
+  }
+
+  volverASuperadmin(): void {
+    this.authService.volverASuperadmin();
+  }
 }

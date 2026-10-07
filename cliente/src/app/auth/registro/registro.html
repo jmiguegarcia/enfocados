@@ -1,0 +1,63 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Crear Cuenta</h2>
+      <p>Regístrate como alumno en Training Tracker</p>
+    </div>
+
+    @if (mensajeError()) {
+      <div class="alerta-error">
+        ⚠️ {{ mensajeError() }}
+      </div>
+    }
+
+    <form [formGroup]="formulario" (ngSubmit)="registrarse()">
+      <div class="campo">
+        <label for="nombre">Nombre Completo</label>
+        <input
+          id="nombre"
+          type="text"
+          formControlName="nombre"
+          placeholder="Juan Pérez"
+          autocomplete="name"
+        />
+      </div>
+
+      <div class="campo">
+        <label for="email">Correo Electrónico</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="juan@ejemplo.com"
+          autocomplete="username"
+        />
+      </div>
+
+      <div class="campo">
+        <label for="password">Contraseña (mínimo 6 caracteres)</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          autocomplete="new-password"
+        />
+      </div>
+
+      <button type="submit" [disabled]="formulario.invalid || cargando()" class="btn-primary">
+        @if (cargando()) {
+          Registrando...
+        } @else {
+          Crear Cuenta
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <span>¿Ya tienes una cuenta? </span>
+      <a routerLink="/login">Inicia sesión aquí</a>
+    </div>
+  </div>
+</div>
+

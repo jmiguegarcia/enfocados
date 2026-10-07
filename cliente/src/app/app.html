@@ -1,10 +1,52 @@
 <header>
-  <h1>Tracker de entrenamientos</h1>
+  <div class="logo-area">
+    <h1>Training Tracker</h1>
+    @if (authService.estaImpersonando()) {
+      <div class="banner-impersonar">
+        <span>Modo Vista: <strong>{{ authService.usuario()?.nombre }}</strong></span>
+        <button type="button" class="btn-restaurar" (click)="volverASuperadmin()">
+          ↩️ Volver a Superadmin
+        </button>
+      </div>
+    }
+  </div>
+
   <nav>
-    <a routerLink="/">Inicio</a>
-    <a routerLink="/nuevo">Añadir entrenamiento</a>
+    @if (authService.autenticado()) {
+      <a routerLink="/">Entrenamientos</a>
+
+      @if (authService.puedeCrearEditar()) {
+        <a routerLink="/nuevo">Añadir entrenamiento</a>
+      }
+
+      @if (authService.puedeVerUsuarios()) {
+        <a routerLink="/usuarios">Usuarios</a>
+      }
+
+      <div class="usuario-perfil">
+        <span class="usuario-nombre">{{ authService.usuario()?.nombre }}</span>
+        <span class="usuario-rol-badge" [class]="'badge-' + authService.usuario()?.rol">
+          @switch (authService.usuario()?.rol) {
+            @case ('superadmin') { 👑 Superadmin }
+            @case ('head_coach') { 🏋️ Head Coach }
+            @case ('assistant_coach') { ⏱️ Asistente }
+            @case ('student') { 🎓 Alumno }
+          }
+        </span>
+        @if (authService.usuario()?.rol === 'student' && authService.usuario()?.temporary_assistant) {
+          <span class="usuario-temp-badge">⚡ Asistente Temp.</span>
+        }
+        <button type="button" class="btn-logout" (click)="cerrarSesion()">
+          Cerrar Sesión
+        </button>
+      </div>
+    } @else {
+      <a routerLink="/login">Iniciar Sesión</a>
+      <a routerLink="/registro" class="btn-registro-nav">Registrarse</a>
+    }
   </nav>
 </header>
+
 <main>
   <router-outlet />
 </main>
