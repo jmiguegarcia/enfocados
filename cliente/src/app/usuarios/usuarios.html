@@ -1,0 +1,234 @@
+<div class="gestion-container">
+  <div class="header-seccion">
+    <div>
+      <h2>Gestión de Usuarios y Permisos</h2>
+      <p class="subtitulo">Administra roles, accesos y permisos temporales de asistente</p>
+    </div>
+
+    @if (authService.esSuperAdmin() || authService.rolActual() === 'head_coach') {
+      <button type="button" class="btn-nuevo" (click)="mostrarCrearModal.set(true)">
+        + Crear Usuario
+      </button>
+    }
+  </div>
+
+  @if (mensajeInfo()) {
+    <div class="alerta-exito">
+      ✅ {{ mensajeInfo() }}
+    </div>
+  }
+
+  @if (mensajeError()) {
+    <div class="alerta-error">
+      ⚠️ {{ mensajeError() }}
+    </div>
+  }
+
+  @if (cargando()) {
+    <p class="cargando">Cargando usuarios...</p>
+  } @else {
+    <div class="tabla-wrapper">
+      <table class="tabla-usuarios">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Rol Base</th>
+            <th>Rol Efectivo</th>
+            <th>Estado</th>
+            <th>Asistente Temporal</th>
+            <th class="col-acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of usuarios(); track u.id) {
+            <tr [class.fila-inactiva]="!u.activo">
+              <td>#{{ u.id }}</td>
+              <td>
+                <div class="info-usuario">
+                  <strong>{{ u.nombre }}</strong>
+                  <span class="email">{{ u.email }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="badge" [class]="'badge-' + u.rol">
+                  @switch (u.rol) {
+                    @case ('superadmin') { 👑 Superadmin }
+                    @case ('head_coach') { 🏋️ Head Coach }
+                    @case ('assistant_coach') { ⏱️ Asistente }
+                    @case ('student') { 🎓 Alumno }
+                  }
+                </span>
+              </td>
+              <td>
+                @if (u.rol === 'student' && u.temporary_assistant) {
+                  <span class="badge badge-temp">
+                    ⚡ Asistente (Temporal)
+                  </span>
+                } @else {
+                  <span class="texto-secundario">{{ u.rol }}</span>
+                }
+              </td>
+              <td>
+                <span class="tag-estado" [class.activo]="u.activo" [class.inactivo]="!u.activo">
+                  {{ u.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <!-- Toggle switch para temporary_assistant (solo para alumnos) -->
+                @if (u.rol === 'student') {
+                  <div class="switch-contenedor">
+                    <label class="switch">
+                      <input
+                        type="checkbox"
+                        [checked]="u.temporary_assistant"
+                        [disabled]="!authService.puedeToggleTempAssistant()"
+                        (change)="toggleTemporaryAssistant(u)"
+                      />
+                      <span class="slider round"></span>
+                    </label>
+                    <span class="switch-label">
+                      {{ u.temporary_assistant ? 'Habilitado' : 'Deshabilitado' }}
+                    </span>
+                  </div>
+                } @else {
+                  <span class="texto-secundario">—</span>
+                }
+              </td>
+              <td class="celda-acciones">
+                <!-- Kebab Menu para Superadmin -->
+                @if (authService.esSuperAdmin()) {
+                  <div class="kebab-contenedor">
+                    <button
+                      type="button"
+                      class="btn-kebab"
+                      [class.kebab-abierto]="menuAbiertoId() === u.id"
+                      [disabled]="u.rol === 'superadmin'"
+                      (click)="toggleMenu(u.id, $event)"
+                      [title]="u.rol === 'superadmin' ? 'Las cuentas superadmin no pueden ser modificadas' : 'Opciones de usuario'"
+                      aria-label="Abrir panel de acciones"
+                    >
+                      <span class="kebab-puntos">⋮</span>
+                    </button>
+
+                    @if (menuAbiertoId() === u.id && u.rol !== 'superadmin') {
+                      <div class="panel-kebab" (click)="$event.stopPropagation()">
+                        <div class="panel-header">
+                          <span class="panel-titulo">Acciones para <strong>{{ u.nombre }}</strong></span>
+                        </div>
+
+                        <!-- Opción Impersonar (si no es él mismo) -->
+                        @if (authService.usuario()?.id !== u.id) {
+                          <button
+                            type="button"
+                            class="item-panel item-impersonar"
+                            (click)="impersonar(u)"
+                          >
+                            <span class="icono-accion">👁️</span>
+                            <div class="texto-accion">
+                              <strong>Impersonar usuario</strong>
+                              <small>Navegar como {{ u.nombre }}</small>
+                            </div>
+                          </button>
+                        }
+
+                        <!-- Opción Activar / Desactivar cuenta -->
+                        @if (puedeModificarActivo(u)) {
+                          <button
+                            type="button"
+                            class="item-panel"
+                            [class.item-desactivar]="u.activo"
+                            [class.item-activar]="!u.activo"
+                            (click)="toggleActivo(u)"
+                          >
+                            <span class="icono-accion">{{ u.activo ? '🚫' : '✅' }}</span>
+                            <div class="texto-accion">
+                              <strong>{{ u.activo ? 'Desactivar cuenta' : 'Activar cuenta' }}</strong>
+                              <small>{{ u.activo ? 'Bloquear acceso a la aplicación' : 'Habilitar acceso a la cuenta' }}</small>
+                            </div>
+                          </button>
+                        }
+
+                        <!-- Atajo para alternar permiso temporal en alumnos -->
+                        @if (u.rol === 'student') {
+                          <button
+                            type="button"
+                            class="item-panel item-temporal"
+                            (click)="toggleTemporaryAssistant(u)"
+                          >
+                            <span class="icono-accion">⚡</span>
+                            <div class="texto-accion">
+                              <strong>{{ u.temporary_assistant ? 'Revocar asistente temporal' : 'Asignar asistente temporal' }}</strong>
+                              <small>{{ u.temporary_assistant ? 'Quitar privilegios de asistente' : 'Conceder permisos de assistant coach' }}</small>
+                            </div>
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <!-- Para otros roles con permisos (como head_coach) -->
+                  <div class="acciones-celda">
+                    @if (puedeModificarActivo(u)) {
+                      <button
+                        type="button"
+                        (click)="toggleActivo(u)"
+                        class="btn-accion"
+                        [class.btn-desactivar]="u.activo"
+                        [class.btn-activar]="!u.activo"
+                      >
+                        {{ u.activo ? 'Desactivar' : 'Activar' }}
+                      </button>
+                    } @else {
+                      <span class="texto-secundario">—</span>
+                    }
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Modal para crear usuario -->
+  @if (mostrarCrearModal()) {
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <h3>Crear Nuevo Usuario</h3>
+        <div class="campo-modal">
+          <label>Nombre:</label>
+          <input type="text" [(ngModel)]="nuevoNombre" placeholder="Nombre completo" />
+        </div>
+        <div class="campo-modal">
+          <label>Email:</label>
+          <input type="email" [(ngModel)]="nuevoEmail" placeholder="usuario@tracker.com" />
+        </div>
+        <div class="campo-modal">
+          <label>Contraseña:</label>
+          <input type="password" [(ngModel)]="nuevoPassword" placeholder="Contraseña segura" />
+        </div>
+        <div class="campo-modal">
+          <label>Rol:</label>
+          <select [(ngModel)]="nuevoRol">
+            <option value="student">🎓 Alumno (student)</option>
+            <option value="assistant_coach">⏱️ Entrenador Asistente (assistant_coach)</option>
+            @if (authService.esSuperAdmin()) {
+              <option value="head_coach">🏋️ Entrenador Principal (head_coach)</option>
+              <option value="superadmin">👑 Super Administrador (superadmin)</option>
+            }
+          </select>
+        </div>
+        <div class="modal-acciones">
+          <button type="button" class="btn-cancelar" (click)="mostrarCrearModal.set(false)">
+            Cancelar
+          </button>
+          <button type="button" class="btn-crear" (click)="crearUsuario()">
+            Guardar Usuario
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
