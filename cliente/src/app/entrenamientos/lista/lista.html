@@ -24,7 +24,7 @@
         <p class="duracion">{{ entrenamiento.duracionMinutos }} min</p>
         <p class="notas">{{ entrenamiento.notas || 'Sin notas adicionales.' }}</p>
 
-        @if (authService.puedeCrearEditar() || authService.rolEfectivo() === 'assistant_coach') {
+        @if (authService.puedeCrearEditar() || authService.puedeEditarNotas()) {
           <div class="acciones">
             @if (authService.puedeCrearEditar()) {
               <a [routerLink]="['/editar', entrenamiento.id]" class="btn editar">Editar</a>
@@ -35,7 +35,7 @@
               >
                 Eliminar
               </button>
-            } @else if (authService.rolEfectivo() === 'assistant_coach') {
+            } @else if (authService.puedeEditarNotas()) {
               <a [routerLink]="['/editar', entrenamiento.id]" class="btn editar-notas">
                 ✏️ Editar Notas
               </a>
