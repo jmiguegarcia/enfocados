@@ -36,14 +36,19 @@ export class AuthService {
     return rol === 'superadmin' || rol === 'head_coach';
   });
 
+  puedeEditarNotas = computed(() => {
+    const rol = this.rolEfectivo();
+    return rol === 'admin' || rol === 'assistant_coach';
+  });
+
   puedeVerUsuarios = computed(() => {
     const rol = this.rolEfectivo();
-    return rol === 'superadmin' || rol === 'head_coach' || rol === 'assistant_coach';
+    return rol === 'superadmin' || rol === 'admin' || rol === 'head_coach' || rol === 'assistant_coach';
   });
 
   puedeToggleTempAssistant = computed(() => {
     const rol = this.rolEfectivo();
-    return rol === 'superadmin' || rol === 'head_coach' || rol === 'assistant_coach';
+    return rol === 'superadmin' || rol === 'admin' || rol === 'head_coach';
   });
 
   constructor() {

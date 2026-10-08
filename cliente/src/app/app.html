@@ -28,6 +28,7 @@
         <span class="usuario-rol-badge" [class]="'badge-' + authService.usuario()?.rol">
           @switch (authService.usuario()?.rol) {
             @case ('superadmin') { 👑 Superadmin }
+            @case ('admin') { 🛡️ Admin }
             @case ('head_coach') { 🏋️ Head Coach }
             @case ('assistant_coach') { ⏱️ Asistente }
             @case ('student') { 🎓 Alumno }

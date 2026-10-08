@@ -115,6 +115,11 @@ nav a:hover {
   color: #92400e;
 }
 
+.badge-admin {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
 .badge-head_coach {
   background: #dbeafe;
   color: #1e40af;

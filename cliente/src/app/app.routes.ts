@@ -33,13 +33,13 @@ export const routes: Routes = [
     path: 'editar/:id',
     component: Editar,
     canActivate: [authGuard, rolGuard],
-    data: { roles: ['superadmin', 'head_coach', 'assistant_coach'] }
+    data: { roles: ['superadmin', 'admin', 'head_coach', 'assistant_coach'] }
   },
   {
     path: 'usuarios',
     component: Usuarios,
     canActivate: [authGuard, rolGuard],
-    data: { roles: ['superadmin', 'head_coach', 'assistant_coach'] }
+    data: { roles: ['superadmin', 'admin', 'head_coach', 'assistant_coach'] }
   },
   {
     path: '**',
