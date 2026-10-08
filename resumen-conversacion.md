@@ -4,7 +4,7 @@ Fecha: 2026-10-08
 
 ## Objetivo
 
-Crear una aplicación para registrar entrenamientos diarios manualmente usando Angular y Node.js, con Antigravity integrado desde Visual Studio Code. Actualmente incluye autenticación con JWT y control de acceso por roles.
+Crear una aplicación para registrar entrenamientos diarios manualmente usando Angular y Node.js, con Antigravity integrado desde Visual Studio Code. Actualmente incluye autenticación con JWT, control de acceso por roles y gestión segura de secretos mediante variables de entorno.
 
 ## Tecnologías
 
@@ -17,6 +17,7 @@ Crear una aplicación para registrar entrenamientos diarios manualmente usando A
 - pg (node-postgres)
 - jsonwebtoken (JWT)
 - bcryptjs
+- dotenv
 - Antigravity / Gemini Pro para asistencia al desarrollo
 
 ## Estructura del proyecto
@@ -33,7 +34,9 @@ C:\Users\juan1\Cursos\project-ia
 servidor/
 ├── index.js               # Punto de entrada, monta rutas e initDB
 ├── db.js                  # Pool de conexión a PostgreSQL (ignorado por git)
-├── init-db.js             # Crea tablas y siembra usuarios de prueba
+├── .env                   # Secretos locales (ignorado por git)
+├── .env.example           # Plantilla de variables de entorno (versionada)
+├── init-db.js             # Crea tablas, migra constraints y siembra usuarios
 ├── middleware/auth.js     # JWT, matriz de permisos y control de acceso
 └── rutas/
     ├── auth.js            # login, registro, /me, impersonar
@@ -45,12 +48,11 @@ servidor/
 cliente/src/app/
 ├── auth/login/            # Pantalla de inicio de sesión
 ├── auth/registro/         # Pantalla de registro
-├── usuarios/              # Vista de gestión de usuarios (superadmin)
-
+├── usuarios/              # Vista de gestión de usuarios (superadmin, admin)
 ├── entrenamientos/        # lista, formulario, editar
 ├── guardas/auth.guard.ts  # Guarda de rutas autenticadas
 ├── interceptores/auth.interceptor.ts  # Adjunta el token JWT
-├── modelos/usuario.ts     # Interface Usuario
+├── modelos/usuario.ts     # Interface Usuario y RolUsuario
 └── servicios/             # auth.ts, usuario.ts, entrenamiento.ts
 ```
 
@@ -75,28 +77,48 @@ cliente/src/app/
 17. Pantallas de login, registro y navegación condicional por rol.
 18. Vista de gestión de usuarios con toggle de assistant temporal y menú kebab.
 19. Restricción de acciones de entrenamientos según el rol del usuario.
+20. Configuración del proyecto en GitHub (repo `jmiguegarcia/enfocados`).
+21. Migración de secretos a variables de entorno con `dotenv` (`.env` ignorado, `.env.example` versionado).
+22. Nuevo rol `admin` con los permisos de head_coach menos `workout:write`.
+23. Quitado `user:toggle_temp_assistant` al rol `assistant_coach` (en servidor y frontend).
+24. Migración del CHECK constraint de `usuarios.rol` para aceptar el rol `admin` en bases existentes.
+25. Pruebas unitarias para permisos de `admin` y `assistant_coach`.
+26. Documentación del flujo de commits en `AGENTS.md`.
 
 ## Roles y permisos
 
-| Permiso | Super Admin | Head Coach | Assistant Coach | Student |
-|---|---|---|---|---|
-| `workout:write` | Sí | Sí | No | No |
-| `workout:read_hidden` | Sí | Sí | Sí | No |
-| `workout:add_notes` | Sí | Sí | Sí | No |
-| `attendance:mark` | Sí | Sí | Sí | No |
-| `attendance:view_own` | Sí | Sí | Sí | Sí |
-| `user:view` | Sí | Sí | Sí | No |
-| `user:manage_students` | Sí | Sí | No | No |
-| `user:toggle_temp_assistant` | Sí | Sí | Sí | No |
+| Permiso | Super Admin | Admin | Head Coach | Assistant Coach | Student |
+|---|---|---|---|---|---|
+| `workout:write` | Sí | No | Sí | No | No |
+| `workout:read_hidden` | Sí | Sí | Sí | Sí | No |
+| `workout:add_notes` | Sí | Sí | Sí | Sí | No |
+| `attendance:mark` | Sí | Sí | Sí | Sí | No |
+| `attendance:view_own` | Sí | Sí | Sí | Sí | Sí |
+| `user:view` | Sí | Sí | Sí | Sí | No |
+| `user:manage_students` | Sí | Sí | Sí | No | No |
+| `user:toggle_temp_assistant` | Sí | Sí | Sí | No | No |
 
-- Los usuarios de tipo `student` con `temporary_assistant = true` obtienen un **rol efectivo de `assistant_coach`** (sin `workout:write`).
+- El rol `admin` tiene todos los permisos de `head_coach` **excepto** `workout:write`: puede leer entrenamientos ocultos, gestionar notas, pasar asistencia y administrar alumnos, pero no crea ni modifica entrenamientos.
+- Los usuarios de tipo `student` con `temporary_assistant = true` obtienen un **rol efectivo de `assistant_coach`** (sin `workout:write` ni `user:toggle_temp_assistant`).
 - Las cuentas con `activo = false` no pueden iniciar sesión (bloqueo en el middleware).
-- El superadmin puede **impersonar** a otro usuario para ver la app desde su perspectiva.
+- El superadmin puede **impersonar** a otro usuario para ver la app desde su perspectiva (`admin_token_backup` en `localStorage`).
+
+## Gestión de secretos
+
+- `servidor/.env` contiene `JWT_SECRET` y `DB_PASSWORD`; está en `.gitignore` y nunca se versiona.
+- `servidor/.env.example` documenta las variables necesarias sin valores reales.
+- `middleware/auth.js` lanza un error si falta `JWT_SECRET`, sin valor por defecto en el código.
+- `servidor/db.js` lee la configuración de conexión desde el entorno.
+
+```bash
+# Generar un nuevo secreto JWT
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
 
 ## Funcionalidades actuales
 
 - Login y registro de usuarios.
-- Control de acceso por rol con JWT.
+- Control de acceso por rol con JWT (5 roles).
 - Listar, crear, editar y eliminar entrenamientos según permiso.
 - Entrenamientos ocultos (`oculto`) visibles solo para quienes tienen `workout:read_hidden`.
 - Gestión de usuarios: activar/desactivar cuentas y asignar assistant temporal.
@@ -138,6 +160,7 @@ cliente/src/app/
 | Email | Rol | Activo | Assistant temporal |
 |---|---|---|---|
 | admin@tracker.com | superadmin | Sí | No |
+| admin.deportes@tracker.com | admin | Sí | No |
 | coach@tracker.com | head_coach | Sí | No |
 | asistente@tracker.com | assistant_coach | Sí | No |
 | juan@tracker.com | student | Sí | No |
@@ -171,10 +194,11 @@ cliente/src/app/
 
 ## Estado actual
 
-La app gestiona entrenamientos con autenticación JWT y control de acceso por 4 roles (superadmin, head_coach, assistant_coach, student). Los datos persisten en PostgreSQL (base `training_db`, tablas `entrenamientos` y `usuarios`). El servidor ejecuta `initDB()` al arrancar para asegurar las tablas y usuarios de prueba. Proyecto versionado en git y sincronizado con GitHub: https://github.com/jmiguegarcia/enfocados
+La app gestiona entrenamientos con autenticación JWT y control de acceso por 5 roles (superadmin, admin, head_coach, assistant_coach, student). Los datos persisten en PostgreSQL (base `training_db`, tablas `entrenamientos` y `usuarios`). El servidor ejecuta `initDB()` al arrancar para asegurar las tablas, migrar el constraint de roles y sembrar usuarios de prueba. Los secretos viven en variables de entorno. Proyecto versionado en git y sincronizado con GitHub: https://github.com/jmiguegarcia/enfocados
 
 ## Siguientes pasos posibles
 
+- **Rediseñar el formato de entrenamiento** (pendiente de definir): se evaluó un modelo normalizado con `rutinas` → `ejercicios` → `series`, más una tabla opcional de `fotos` con archivos en disco (`multer`) y solo la ruta en la BD.
 - Implementar asistencia (`attendance:mark` y `attendance:view_own` aún no tienen rutas).
 - Implementar bitácora/notas post-sesión (`workout:add_notes`).
 - Asignación de rutinas y grupos por entrenador.
