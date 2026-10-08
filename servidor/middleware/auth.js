@@ -11,6 +11,15 @@ if (!JWT_SECRET) {
 
 const PERMISOS = {
   superadmin: ['*'],
+  admin: [
+    'workout:read_hidden',
+    'workout:add_notes',
+    'attendance:mark',
+    'attendance:view_own',
+    'user:view',
+    'user:manage_students',
+    'user:toggle_temp_assistant'
+  ],
   head_coach: [
     'workout:write',
     'workout:read_hidden',
@@ -26,8 +35,7 @@ const PERMISOS = {
     'workout:add_notes',
     'attendance:mark',
     'attendance:view_own',
-    'user:view',
-    'user:toggle_temp_assistant'
+    'user:view'
   ],
   student: [
     'attendance:view_own'

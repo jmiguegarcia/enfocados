@@ -3,16 +3,15 @@ const bcrypt = require('bcryptjs');
 const pool = require('../db');
 const {
   autenticarToken,
-  obtenerRolEfectivo
+  obtenerRolEfectivo,
+  tienePermiso
 } = require('../middleware/auth');
 
 const router = express.Router();
 
-// GET /api/usuarios (superadmin, head_coach, assistant_coach, o student con temporary_assistant)
+// GET /api/usuarios (superadmin, admin, head_coach, assistant_coach, o student con temporary_assistant)
 router.get('/', autenticarToken, async (req, res) => {
-  const rolEfectivo = obtenerRolEfectivo(req.usuario);
-
-  if (!['superadmin', 'head_coach', 'assistant_coach'].includes(rolEfectivo)) {
+  if (!tienePermiso(req.usuario, 'user:view')) {
     return res.status(403).json({ error: 'Acceso denegado: no tienes permisos para ver usuarios' });
   }
 
@@ -27,7 +26,7 @@ router.get('/', autenticarToken, async (req, res) => {
   }
 });
 
-// POST /api/usuarios (Crear usuario: superadmin o head_coach)
+// POST /api/usuarios (Crear usuario: superadmin, admin o head_coach)
 router.post('/', autenticarToken, async (req, res) => {
   const { nombre, email, password, rol } = req.body;
 
@@ -35,17 +34,21 @@ router.post('/', autenticarToken, async (req, res) => {
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
   }
 
-  const rolesPermitidos = ['superadmin', 'head_coach', 'assistant_coach', 'student'];
+  const rolesPermitidos = ['superadmin', 'admin', 'head_coach', 'assistant_coach', 'student'];
   if (!rolesPermitidos.includes(rol)) {
     return res.status(400).json({ error: 'Rol no válido' });
   }
 
   // Restricción según quién crea
-  if (req.usuario.rol === 'head_coach' && (rol === 'superadmin' || rol === 'head_coach')) {
+  if (req.usuario.rol === 'head_coach' && (rol === 'superadmin' || rol === 'admin' || rol === 'head_coach')) {
     return res.status(403).json({ error: 'Un head_coach solo puede crear alumnos o asistentes' });
   }
 
-  if (req.usuario.rol !== 'superadmin' && req.usuario.rol !== 'head_coach') {
+  if (req.usuario.rol === 'admin' && rol !== 'student') {
+    return res.status(403).json({ error: 'Un admin solo puede crear alumnos' });
+  }
+
+  if (req.usuario.rol !== 'superadmin' && req.usuario.rol !== 'head_coach' && req.usuario.rol !== 'admin') {
     return res.status(403).json({ error: 'No tienes permisos para crear usuarios' });
   }
 
@@ -72,7 +75,7 @@ router.post('/', autenticarToken, async (req, res) => {
   }
 });
 
-// PATCH /api/usuarios/:id/temporary-assistant (superadmin, head_coach, assistant_coach)
+// PATCH /api/usuarios/:id/temporary-assistant (superadmin, admin, head_coach)
 router.patch('/:id/temporary-assistant', autenticarToken, async (req, res) => {
   const id = Number(req.params.id);
   const { temporary_assistant } = req.body;
@@ -81,8 +84,7 @@ router.patch('/:id/temporary-assistant', autenticarToken, async (req, res) => {
     return res.status(400).json({ error: 'temporary_assistant debe ser un valor booleano (true/false)' });
   }
 
-  const rolEfectivo = obtenerRolEfectivo(req.usuario);
-  if (!['superadmin', 'head_coach', 'assistant_coach'].includes(rolEfectivo)) {
+  if (!tienePermiso(req.usuario, 'user:toggle_temp_assistant')) {
     return res.status(403).json({ error: 'No tienes permisos para modificar temporary_assistant' });
   }
 
@@ -92,7 +94,7 @@ router.patch('/:id/temporary-assistant', autenticarToken, async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Requisito 4: Solo aplica para usuarios con rol 'student'
+    // Solo aplica para usuarios con rol 'student'
     if (usuarioDestino.rows[0].rol !== 'student') {
       return res.status(400).json({ error: 'El permiso temporary_assistant solo aplica para alumnos (student)' });
     }
@@ -131,13 +133,18 @@ router.patch('/:id/activo', autenticarToken, async (req, res) => {
       return res.status(400).json({ error: 'No puedes desactivar tu propia cuenta' });
     }
 
-    // superadmin puede activar/desactivar entrenadores y alumnos
+    // superadmin puede activar/desactivar entrenadores, admins y alumnos
+    // admin puede activar/desactivar alumnos y asistentes (assistant_coach)
     // head_coach solo puede activar/desactivar alumnos
     if (req.usuario.rol === 'superadmin') {
       // permitido
+    } else if (req.usuario.rol === 'admin') {
+      if (targetUser.rol !== 'student' && targetUser.rol !== 'assistant_coach') {
+        return res.status(403).json({ error: 'Un admin solo puede activar o desactivar alumnos y asistentes (assistant_coach)' });
+      }
     } else if (req.usuario.rol === 'head_coach') {
       if (targetUser.rol !== 'student') {
-        return res.status(403).json({ error: 'Un head_coach solo puede activar o desactivar alumnos (student)' });
+        return res.status(403).json({ error: 'Solo se puede activar o desactivar alumnos (student)' });
       }
     } else {
       return res.status(403).json({ error: 'No tienes permisos para modificar el estado de usuarios' });
