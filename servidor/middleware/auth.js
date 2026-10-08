@@ -1,7 +1,13 @@
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'training_tracker_secret_jwt_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error(
+    'Falta la variable de entorno JWT_SECRET. Defininga en servidor/.env antes de iniciar.'
+  );
+}
 
 const PERMISOS = {
   superadmin: ['*'],

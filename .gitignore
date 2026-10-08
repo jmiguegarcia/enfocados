@@ -2,6 +2,11 @@ node_modules/
 .angular/
 dist/
 *.log
+# Secretos (nunca subirlos a git)
 .env
+servidor/.env
 servidor/datos/*.json
 servidor/db.js
+
+# Ejemplo de variables de entorno (este si se sube)
+!servidor/.env.example
