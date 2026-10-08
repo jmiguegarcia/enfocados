@@ -5,7 +5,7 @@
       <p class="subtitulo">Administra roles, accesos y permisos temporales de asistente</p>
     </div>
 
-    @if (authService.esSuperAdmin() || authService.rolActual() === 'head_coach') {
+    @if (authService.esSuperAdmin() || authService.rolActual() === 'head_coach' || authService.rolActual() === 'admin') {
       <button type="button" class="btn-nuevo" (click)="mostrarCrearModal.set(true)">
         + Crear Usuario
       </button>
@@ -54,6 +54,7 @@
                 <span class="badge" [class]="'badge-' + u.rol">
                   @switch (u.rol) {
                     @case ('superadmin') { 👑 Superadmin }
+                    @case ('admin') { 🛡️ Admin }
                     @case ('head_coach') { 🏋️ Head Coach }
                     @case ('assistant_coach') { ⏱️ Asistente }
                     @case ('student') { 🎓 Alumno }
@@ -215,6 +216,7 @@
             <option value="student">🎓 Alumno (student)</option>
             <option value="assistant_coach">⏱️ Entrenador Asistente (assistant_coach)</option>
             @if (authService.esSuperAdmin()) {
+              <option value="admin">🛡️ Administrador (admin)</option>
               <option value="head_coach">🏋️ Entrenador Principal (head_coach)</option>
               <option value="superadmin">👑 Super Administrador (superadmin)</option>
             }

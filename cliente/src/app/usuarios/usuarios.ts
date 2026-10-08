@@ -64,6 +64,9 @@ export class Usuarios implements OnInit {
   }
 
   toggleTemporaryAssistant(usuario: Usuario): void {
+    if (!this.authService.puedeToggleTempAssistant()) {
+      return;
+    }
     this.menuAbiertoId.set(null);
     const nuevoValor = !usuario.temporary_assistant;
 
@@ -123,6 +126,7 @@ export class Usuarios implements OnInit {
     if (!currentUser) return false;
     if (currentUser.id === usuario.id) return false; // No auto-desactivarse
     if (currentUser.rol === 'superadmin') return true;
+    if (currentUser.rol === 'admin' && (usuario.rol === 'student' || usuario.rol === 'assistant_coach')) return true;
     if (currentUser.rol === 'head_coach' && usuario.rol === 'student') return true;
     return false;
   }
