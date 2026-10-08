@@ -46,3 +46,11 @@ npm start
 - Angular 22 usa standalone components.
 - Los componentes deben usar `inject()` en lugar de constructor injection.
 - En Angular 22 se busca usar signals para estado reactivo.
+
+## Flujo de Commits y Git
+
+- Cuando el usuario diga **"estoy listo para hacer commit y push"**, el asistente debe:
+  - Analizar los ficheros que están en los cambios (`changes` / git status).
+  - Generar un plan de commits para subir los cambios de manera ordenada utilizando **Conventional Commits**.
+  - Entregar **únicamente el plan en el chat** con los comandos exactos (`git add` y `git commit -m "..."`).
+  - **No ejecutar commits ni pushes directamente**: el usuario realiza los commits manualmente.
